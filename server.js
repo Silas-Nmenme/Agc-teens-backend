@@ -122,7 +122,7 @@ app.post('/api/chat', async (req, res) => {
 
 //Route
 app.get('/', (req, res) => {
-  res.send('🎉 AGC Teens Backend is Running');
+  res.send('AGC Teens Backend is Running');
 });
 
 // Start Server
