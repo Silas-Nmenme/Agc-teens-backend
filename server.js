@@ -77,10 +77,10 @@ app.post('/api/prayer', async (req, res) => {
 
     // Send full content to admin as raw email (NOT using the template)
     await sendEmail(process.env.ADMIN_EMAIL, null, {
-      subject: `🛐 New Prayer Request from ${name}`,
+      subject: `New Prayer Request from ${name}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2>🛐 New Prayer Request</h2>
+          <h2>New Prayer Request</h2>
           <p><strong>Name:</strong> ${name}</p>
           ${email ? `<p><strong>Email:</strong> ${email}</p>` : ''}
           <p><strong>Message:</strong></p>
