@@ -5,7 +5,9 @@ const connectDB = require('./config/db');
 const dotenv = require('dotenv');
 require('dotenv').config();
 const sendEmail = require('./config/emailService');
-
+const jwt = require('jsonwebtoken');
+const Admin = require('./models/Admin');
+const requireAuth = require('./middlewares/auth.js');
 
 
 // Import Models
@@ -25,28 +27,19 @@ app.use(express.json());
 // RSVP Endpoint
 app.post('/api/rsvp', async (req, res) => {
   const { name, email } = req.body;
-  console.log('Incoming RSVP:', { name, email });
 
   try {
-    const saved = await RSVP.create({ name, email });
-    console.log('RSVP saved:', saved);
-
-    //Respond IMMEDIATELY to frontend
+    await RSVP.create({ name, email });
     res.json({ message: `Thank you ${name}, your RSVP has been received.` });
 
-    //Send emails in the background
     if (email) {
-      sendEmail(email, 'rsvp', { name }).catch(err =>
-        console.error('User RSVP email failed:', err.message)
-      );
+      sendEmail(email, 'rsvp', { name });
     }
 
-    sendEmail(process.env.ADMIN_EMAIL, 'rsvp', { name }).catch(err =>
-      console.error('Admin RSVP email failed:', err.message)
-    );
+    // No admin email
   } catch (err) {
     console.error('RSVP error:', err.message);
-    res.status(500).json({ message: 'Failed to process RSVP.' });
+    res.status(500).json({ message: 'RSVP failed.' });
   }
 });
 
@@ -54,57 +47,54 @@ app.post('/api/rsvp', async (req, res) => {
 //Newsletter End Point
 app.post('/api/newsletter', async (req, res) => {
   const { email } = req.body;
-  console.log('Newsletter subscription received:', email);
 
   try {
-    const saved = await Newsletter.create({ email });
-    console.log('Newsletter saved:', saved);
+    await Newsletter.create({ email });
+    res.json({ message: `You're subscribed! Confirmation sent.` });
 
-    //Respond immediately
-    res.json({ message: `You're subscribed! A confirmation email has been sent.` });
+    sendEmail(email, 'newsletter', { email });
 
-    //Send emails asynchronously
-    if (email) {
-      sendEmail(email, 'newsletter').catch(err =>
-        console.error('Failed to send newsletter email to user:', err.message)
-      );
-    }
-
-    sendEmail(process.env.ADMIN_EMAIL, 'newsletter').catch(err =>
-      console.error('Failed to send newsletter email to admin:', err.message)
-    );
+    // No admin email
   } catch (err) {
-    console.error('Newsletter backend error:', err);
+    console.error('Newsletter error:', err.message);
     res.status(500).json({ message: 'Newsletter subscription failed.' });
   }
 });
 
-
 //Prayer Request Endpoint
 app.post('/api/prayer', async (req, res) => {
-  const { name, request, email } = req.body;
-  console.log('Prayer request received:', { name, request, email });
+  const { name, email, request } = req.body;
 
   try {
-    const saved = await Prayer.create({ name, request });
-    console.log('Prayer saved:', saved);
+    await Prayer.create({ name, request });
 
-    // Respond immediately
     res.json({ message: `Thanks ${name}, your prayer was received.` });
 
-    //Send emails asynchronously
+    // Send confirmation to user only
     if (email) {
-      sendEmail(email, 'prayer', { name }).catch(err =>
-        console.error('Failed to send prayer confirmation to user:', err.message)
-      );
+      await sendEmail(email, 'prayer', { name });
     }
 
-    sendEmail(process.env.ADMIN_EMAIL, 'prayer', { name }).catch(err =>
-      console.error('Failed to send prayer copy to admin:', err.message)
-    );
+    // Send full content to admin as raw email (NOT using the template)
+    await sendEmail(process.env.ADMIN_EMAIL, null, {
+      subject: `🛐 New Prayer Request from ${name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>🛐 New Prayer Request</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          ${email ? `<p><strong>Email:</strong> ${email}</p>` : ''}
+          <p><strong>Message:</strong></p>
+          <blockquote style="background:#f9f9f9; padding:10px; border-left:4px solid #2575fc;">
+            ${request}
+          </blockquote>
+        </div>
+      `,
+      text: `New Prayer Request from ${name}\n\n${email ? `Email: ${email}\n\n` : ''}Message:\n${request}`
+    });
+
   } catch (err) {
-    console.error('Prayer backend error:', err);
-    res.status(500).json({ message: 'Prayer request submission failed.' });
+    console.error('Prayer route error:', err.message);
+    res.status(500).json({ message: 'Prayer request failed.' });
   }
 });
 
@@ -124,6 +114,30 @@ app.post('/api/chat', async (req, res) => {
 app.get('/', (req, res) => {
   res.send('AGC Teens Backend is Running');
 });
+
+
+app.post('/api/admin/login', async (req, res) => {
+  const { email, password } = req.body;
+  const admin = await Admin.findOne({ email });
+
+  if (!admin || !(await admin.comparePassword(password))) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
+
+  const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '2h' });
+  res.json({ token });
+});
+
+
+app.get('/api/admin/prayers', requireAuth, async (req, res) => {
+  try {
+    const prayers = await Prayer.find().sort({ createdAt: -1 });
+    res.json(prayers);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch prayers' });
+  }
+});
+
 
 // Start Server
 app.listen(PORT, ()=> {

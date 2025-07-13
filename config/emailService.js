@@ -16,39 +16,38 @@ require('dotenv').config();
         });
 
 /**
- * Send formatted HTML email
- * @param {string} to - Recipient
- * @param {string} template - 'rsvp' | 'newsletter' | 'prayer'
- * @param {object} data - Data needed for template
+ * sendEmail - Sends email using either a predefined template or raw content
+ * @param {string} to - recipient email
+ * @param {string|null} template - template name (e.g. 'rsvp', 'newsletter', 'prayer') or null for raw
+ * @param {object} data - either template data or { subject, html, text }
  */
-const sendEmail = async (to, template, data = {}) => {
-  let emailContent;
-
-  switch (template) {
-    case 'rsvp':
-      emailContent = emailTemplates.rsvpTemplate(data.name);
-      break;
-    case 'newsletter':
-      emailContent = emailTemplates.newsletterTemplate(to);
-      break;
-    case 'prayer':
-      emailContent = emailTemplates.prayerTemplate(data.name);
-      break;
-    default:
-      throw new Error('Invalid template');
-  }
-
+const sendEmail = async (to, template = null, data = {}) => {
   try {
-    await transporter.sendMail({
+    let subject, html, text;
+
+    if (template && typeof emailTemplates[`${template}Template`] === 'function') {
+      const tpl = emailTemplates[`${template}Template`](data.name || data.email);
+      subject = tpl.subject;
+      html = tpl.html;
+      text = tpl.text;
+    } else {
+      subject = data.subject;
+      html = data.html;
+      text = data.text;
+    }
+
+    const mailOptions = {
       from: `"AGC Teens Church" <${process.env.EMAIL_USER}>`,
       to,
-      subject: emailContent.subject,
-      html: emailContent.html,
-      text: emailContent.text
-    });
-    console.log(`Email sent to ${to}`);
-  } catch (error) {
-    console.error(`Failed to send email to ${to}:`, error.message);
+      subject,
+      html,
+      text,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Email sent to ${to}:`, info.response);
+  } catch (err) {
+    console.error(`Failed to send email to ${to}:`, err.message);
   }
 };
 
