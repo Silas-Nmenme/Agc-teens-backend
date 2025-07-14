@@ -1,14 +1,19 @@
+// middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
+const Admin = require('../models/Adminschema');
 
-module.exports = function (req, res, next) {
-  const token = req.header('Authorization');
-  if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
+module.exports = async (req, res, next) => {
+  const token = req.headers.authorization;
+  if (!token) return res.status(401).json({ error: 'No token provided' });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.admin = decoded; // You can now access req.admin.adminId in your routes
+    const admin = await Admin.findById(decoded.id);
+    if (!admin) return res.status(401).json({ error: 'Invalid token' });
+
+    req.admin = admin;
     next();
   } catch (err) {
-    res.status(400).json({ message: 'Invalid token.' });
+    res.status(401).json({ error: 'Unauthorized' });
   }
 };

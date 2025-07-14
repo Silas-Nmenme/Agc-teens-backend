@@ -9,6 +9,8 @@ const jwt = require('jsonwebtoken');
 const Admin = require('./models/Adminschema.js');
 const requireAuth = require('./middlewares/auth.js');
 const adminRoutes = require('./routes/admin.js');
+const path = require('path');
+
 
 // Import Models
 const RSVP = require('./models/RSVP');
@@ -26,6 +28,8 @@ app.use('/api/admin', adminRoutes);
 app.use(cors());
 app.use(express.json());
 
+//Uploade
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // RSVP Endpoint
 app.post('/api/rsvp', async (req, res) => {
