@@ -133,6 +133,8 @@ app.get('/', (req, res) => {
 });
 
 
+//Register
+
 app.post('/api/admin/login', async (req, res) => {
   const { email, password } = req.body;
   const admin = await Admin.findOne({ email });

@@ -9,6 +9,7 @@ const auth = require('../middlewares/auth');
 const RSVP = require('../models/RSVP');
 const Newsletter = require('../models/Newsletter');
 const Countdown = require('../models/countdown');
+const Prayer = require('../models/PrayerRequest');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const BASE_URL = process.env.BASE_URL;
@@ -21,64 +22,64 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-
-//Register
+// Admin Registration
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    const existing = await Admin.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
     const admin = await Admin.create({ name, email, password });
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: admin._id }, JWT_SECRET);
     res.json({ token });
   } catch (err) {
+    console.error('Registration Error:', err);
     res.status(400).json({ error: 'Registration failed' });
   }
 });
 
-
-// Login
+// Admin Login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const admin = await Admin.findOne({ email });
   if (!admin || !(await admin.comparePassword(password))) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
-  const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET);
+  const token = jwt.sign({ id: admin._id }, JWT_SECRET);
   res.json({ token });
 });
 
-//Logout
+// Admin Logout
 router.post('/logout', (req, res) => {
   res.status(200).json({ message: 'Logged out' });
 });
 
-
 // Get RSVPs
-router.get('/', auth, async (req, res) => {
+router.get('/rsvp', auth, async (req, res) => {
   const rsvps = await RSVP.find().sort({ createdAt: -1 });
   res.json(rsvps);
 });
 
-
 // Get Prayer Requests
-router.get('/', auth, async (req, res) => {
+router.get('/prayers', auth, async (req, res) => {
   const prayers = await Prayer.find().sort({ createdAt: -1 });
   res.json(prayers);
 });
 
-
 // Get Newsletter Subscribers
-router.get('/', auth, async (req, res) => {
-  const subscribers = await Subscriber.find().sort({ createdAt: -1 });
+router.get('/subscribers', auth, async (req, res) => {
+  const subscribers = await Newsletter.find().sort({ createdAt: -1 });
   res.json(subscribers);
 });
 
-
-// Get/Set Countdown
+// Get Countdown
 router.get('/countdown', async (req, res) => {
   const data = await Countdown.findOne();
   res.json(data);
 });
 
+// Set Countdown
 router.post('/countdown', auth, async (req, res) => {
   const { event, date } = req.body;
   let countdown = await Countdown.findOne();
