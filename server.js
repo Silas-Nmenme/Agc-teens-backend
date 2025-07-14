@@ -68,8 +68,14 @@ app.post('/api/newsletter', async (req, res) => {
 app.post('/api/prayer', async (req, res) => {
   const { name, email, request } = req.body;
 
+  if (!name || !request) {
+    return res.status(400).json({ message: 'Name and prayer request are required.' });
+  }
+
   try {
-    await Prayer.create({ name, request });
+    // Save to database
+    await PrayerRequest.create({ name, email, message: request });
+
 
     res.json({ message: `Thanks ${name}, your prayer was received.` });
 
@@ -77,6 +83,7 @@ app.post('/api/prayer', async (req, res) => {
     if (email) {
       await sendEmail(email, 'prayer', { name });
     }
+    
 
     // Send full content to admin as raw email (NOT using the template)
     await sendEmail(process.env.ADMIN_EMAIL, null, {
