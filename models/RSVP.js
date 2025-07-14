@@ -1,7 +1,7 @@
+// models/RSVP.js
 const mongoose = require('mongoose');
-const RSVP = new mongoose.Schema({
+module.exports = mongoose.model('RSVP', new mongoose.Schema({
   name: String,
   email: String,
-  createdAt: { type: Date, default: Date.now }
-});
-module.exports = mongoose.model('RSVP', RSVP);
+  timestamp: { type: Date, default: Date.now }
+}));

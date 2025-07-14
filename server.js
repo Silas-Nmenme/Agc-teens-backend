@@ -6,9 +6,9 @@ const dotenv = require('dotenv');
 require('dotenv').config();
 const sendEmail = require('./config/emailService');
 const jwt = require('jsonwebtoken');
-const Admin = require('./models/Admin');
+const Admin = require('./models/Adminschema.js');
 const requireAuth = require('./middlewares/auth.js');
-
+const adminRoutes = require('./routes/admin.js');
 
 // Import Models
 const RSVP = require('./models/RSVP');
@@ -16,8 +16,11 @@ const Newsletter = require('./models/Newsletter');
 const Prayer = require('./models/Prayer');
 const Chat = require('./models/Chats');
 
+
 const app = express();
 const PORT = process.env.PORT || 4000;
+app.use('/api/admin', adminRoutes);
+
 
 // Middleware
 app.use(cors());
