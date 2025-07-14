@@ -31,27 +31,20 @@ app.use(express.json());
 app.post('/api/rsvp', async (req, res) => {
   const { name, email } = req.body;
 
-  // Debug: log incoming data
-  console.log('RSVP received:', req.body);
-
-  if (!name || !email) {
-    return res.status(400).json({ message: 'Name and email are required.' });
-  }
-
   try {
-    // Save to MongoDB
+    // Save to MongoDB using your existing schema
     await RSVP.create({ name, email });
 
     // Respond to user
     res.json({ message: `Thank you ${name}, your RSVP has been received.` });
 
-    // Send confirmation email (optional)
+    // Send confirmation email if provided
     if (email) {
       await sendEmail(email, 'rsvp', { name });
     }
 
   } catch (err) {
-    console.error('RSVP error:', err);
+    console.error('RSVP error:', err.message);
     res.status(500).json({ message: 'RSVP failed.' });
   }
 });
