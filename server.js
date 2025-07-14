@@ -13,7 +13,7 @@ const adminRoutes = require('./routes/admin.js');
 // Import Models
 const RSVP = require('./models/RSVP');
 const Newsletter = require('./models/Newsletter');
-const Prayer = require('./models/Prayer');
+const Prayer = require('./models/PrayerRequest.js');
 const Chat = require('./models/Chats');
 
 

@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const auth = require('../middlewares/auth');
 const RSVP = require('../models/RSVP');
-const PrayerRequest = require('../models/Prayer');
 const Newsletter = require('../models/Newsletter');
 const Countdown = require('../models/countdown');
 
