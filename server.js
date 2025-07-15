@@ -76,15 +76,15 @@ app.post('/api/newsletter', async (req, res) => {
 
 //Prayer Request Endpoint
 app.post('/api/prayer', async (req, res) => {
-  const { name, email, message } = req.body;
+  const { name, email, request } = req.body;
 
-  if (!name || !message) {
+  if (!name || !request) {
     return res.status(400).json({ message: 'Name and prayer request are required.' });
   }
 
   try {
     // Save to database
-   await PrayerRequest.create({ name, email, message });
+   await PrayerRequest.create({ name, email, request });
 
 
     res.json({ message: `Thanks ${name}, your prayer was received.` });
