@@ -76,9 +76,9 @@ app.post('/api/newsletter', async (req, res) => {
 
 //Prayer Request Endpoint
 app.post('/api/prayer', async (req, res) => {
-  const { name, email, request } = req.body;
+  const { name, email, message } = req.body;
 
-  if (!name || !request) {
+  if (!name || !message) {
     return res.status(400).json({ message: 'Name and prayer request are required.' });
   }
 
