@@ -20,7 +20,7 @@ const Chat = require('./models/Chats');
 
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4500;
 app.use('/api/admin', adminRoutes);
 
 
@@ -130,21 +130,6 @@ app.post('/api/chat', async (req, res) => {
 //Route
 app.get('/', (req, res) => {
   res.send('AGC Teens Backend is Running');
-});
-
-
-//Register
-
-app.post('/api/admin/login', async (req, res) => {
-  const { email, password } = req.body;
-  const admin = await Admin.findOne({ email });
-
-  if (!admin || !(await admin.comparePassword(password))) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-
-  const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '2h' });
-  res.json({ token });
 });
 
 
