@@ -1,11 +1,10 @@
-// models/Admin.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const adminSchema = new mongoose.Schema({
   name: String,
-  email: { type: String, unique: true },
-  password: String
+  email: { type: String, unique: true, required: true },
+  password: { type: String, required: true }
 });
 
 adminSchema.pre('save', async function (next) {
@@ -14,8 +13,8 @@ adminSchema.pre('save', async function (next) {
   next();
 });
 
-adminSchema.methods.comparePassword = function (password) {
-  return bcrypt.compare(password, this.password);
+adminSchema.methods.comparePassword = function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('Admin', adminSchema);

@@ -26,16 +26,23 @@ const transporter = nodemailer.createTransport({
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+
     const existing = await Admin.findOne({ email });
     if (existing) {
-      return res.status(400).json({ error: 'Email already exists' });
+      return res.status(400).json({ error: 'Email already exists.' });
     }
+
     const admin = await Admin.create({ name, email, password });
-    const token = jwt.sign({ id: admin._id }, JWT_SECRET);
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET);
     res.json({ token });
+
   } catch (err) {
-    console.error('Registration Error:', err);
-    res.status(400).json({ error: 'Registration failed' });
+    console.error('Registration Error:', err); // Critical for debugging
+    res.status(400).json({ error: err.message || 'Registration failed.' });
   }
 });
 
