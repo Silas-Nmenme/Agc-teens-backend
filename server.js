@@ -84,7 +84,7 @@ app.post('/api/prayer', async (req, res) => {
 
   try {
     // Save to database
-    await PrayerRequest.create({ name, email, message: request });
+   await PrayerRequest.create({ name, email, message });
 
 
     res.json({ message: `Thanks ${name}, your prayer was received.` });
