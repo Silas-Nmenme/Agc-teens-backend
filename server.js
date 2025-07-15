@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const dotenv = require('dotenv');
-require('dotenv').config();
 const sendEmail = require('./config/emailService');
 const jwt = require('jsonwebtoken');
 const Admin = require('./models/Adminschema.js');
@@ -18,10 +17,9 @@ const Newsletter = require('./models/Newsletter');
 const PrayerRequest = require('./models/PrayerRequest.js');
 const Chat = require('./models/Chats');
 
-
+dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4500;
-app.use('/api/admin', adminRoutes);
 
 
 // Middleware
@@ -30,6 +28,12 @@ app.use(express.json());
 
 //Uploade
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.use('/api/admin', adminRoutes);
+
+app.use('/api/rsvp', require('./routes/rsvp'));
+app.use('/api/prayer', require('./routes/prayer.js'));
+
 
 // RSVP Endpoint
 app.post('/api/rsvp', async (req, res) => {

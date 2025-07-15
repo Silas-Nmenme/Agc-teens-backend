@@ -1,19 +1,15 @@
-// middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
-const Admin = require('../models/Adminschema');
+const JWT_SECRET = process.env.JWT_SECRET;
 
-module.exports = async (req, res, next) => {
-  const token = req.headers.authorization;
-  if (!token) return res.status(401).json({ error: 'No token provided' });
+module.exports = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'Access denied' });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const admin = await Admin.findById(decoded.id);
-    if (!admin) return res.status(401).json({ error: 'Invalid token' });
-
-    req.admin = admin;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.admin = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ error: 'Unauthorized' });
+    res.status(401).json({ error: 'Invalid token' });
   }
 };

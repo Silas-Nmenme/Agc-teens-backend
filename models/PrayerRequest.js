@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 
-const PrayerSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  message: String,
-  timestamp: { type: Date, default: Date.now }
-});
+const prayerRequestSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String },
+  message: { type: String, required: true },
+}, { timestamps: true });
 
-module.exports = mongoose.model('prayer', PrayerSchema);
+module.exports = mongoose.model('PrayerRequest', prayerRequestSchema);
