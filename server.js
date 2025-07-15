@@ -32,7 +32,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/admin', adminRoutes);
 
 app.use('/api/rsvp', require('./routes/rsvp'));
-app.use('/api/prayer', require('./routes/prayer.js'));
 
 
 // RSVP Endpoint
