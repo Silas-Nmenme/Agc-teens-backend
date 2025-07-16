@@ -45,44 +45,59 @@ router.post('/register', async (req, res) => {
 
     const admin = new Admin({ name, username, email, phone, password, verificationToken });
     await admin.save();
-    console.log('[DEBUG] Admin saved');
+    co // Generate 6-digit verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    admin.verificationCode = code;
+    admin.verificationExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+// Send verification email
+    await transporter.sendMail({
+      from: 'agcteenchurchofficial@gmail.com',
+      to: admin.email,
+      subject: 'Verify Your Admin Account',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee;">
+          <h2>Welcome to Teens Church Admin</h2>
+          <p>Hi ${name},</p>
+          <p>Your verification code is:</p>
+          <div style="font-size: 24px; font-weight: bold; color: #2c3e50;">${code}</div>
+          <p>This code will expire in 10 minutes.</p>
+          <p>If you did not register, please ignore this email.</p>
+        </div>
+      `
+    });
+     res.status(201).json({
+      message: 'Admin registered. Verification code sent to email.',
+      email: admin.email
+    });
 
-    await sendVerificationEmail(email, verificationToken);
-    console.log('[DEBUG] Verification email sent');
-
-    res.status(201).json({ message: 'Registration successful! Check your email.', token: verificationToken });
   } catch (err) {
-    console.error('[ERROR] Registration failed:', err);
+    console.error('[REGISTER ERROR]', err);
     res.status(500).json({ error: 'Registration failed' });
   }
 });
 
-router.get('/verify', async (req, res) => {
-  const { token } = req.query;
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const admin = await Admin.findOne({ email: decoded.email });
+router.post('/verify-code', async (req, res) => {
+  const { email, code } = req.body;
 
-    if (!admin) return res.status(404).send('Admin not found.');
-    if (admin.isVerified) return res.send('Your account is already verified.');
+  const admin = await Admin.findOne({ email });
 
-    admin.isVerified = true;
-    admin.verificationToken = null;
-    await admin.save();
+  if (!admin) return res.status(404).json({ error: 'Admin not found' });
 
-    res.send(`
-      <div style="text-align: center; padding: 50px; font-family: Arial;">
-        <h2>🎉 Your account has been verified!</h2>
-        <p>You can now <a href="login.html">log in</a> to the Admin Dashboard.</p>
-      </div>
-    `);
-  } catch (err) {
-    console.error(err);
-    res.status(400).send('Invalid or expired verification link.');
+  if (
+    admin.verificationCode !== code ||
+    admin.verificationExpires < Date.now()
+  ) {
+    return res.status(400).json({ error: 'Invalid or expired code' });
   }
-});
 
+  admin.isVerified = true;
+  admin.verificationCode = null;
+  admin.verificationExpires = null;
+  await admin.save();
+
+  res.json({ message: 'Verification successful' });
+});
 
 
 // Admin Login
@@ -179,5 +194,7 @@ router.put('/profile', auth, async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+
 
 module.exports = router;

@@ -34,6 +34,12 @@ const adminSchema = new mongoose.Schema({
   type: Date,
   default: null,
 },
+verificationCode: String,
+verificationExpires: Date,
+isVerified: {
+  type: Boolean,
+  default: false
+},
   verificationToken: {
     type: String
   }
