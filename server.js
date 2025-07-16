@@ -17,7 +17,7 @@ const Newsletter = require('./models/Newsletter');
 const PrayerRequest = require('./models/PrayerRequest.js');
 const Chat = require('./models/Chats');
 
-dotenv.config();
+require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 4500;
 
