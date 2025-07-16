@@ -82,8 +82,6 @@ router.post('/register', async (req, res) => {
 });
 
 
-
-
 router.post('/verify-code', async (req, res) => {
   const { email, code } = req.body;
 
