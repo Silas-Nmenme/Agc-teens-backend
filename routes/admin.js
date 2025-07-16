@@ -35,6 +35,7 @@ router.post('/register', async (req, res) => {
     if (existing) {
       return res.status(400).json({ error: 'Email already exists.' });
     }
+console.log("Incoming registration:", req.body);
 
     // Create verification token
     const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1d' });
