@@ -45,36 +45,19 @@ router.post('/register', async (req, res) => {
 
     const admin = new Admin({ name, username, email, phone, password, verificationToken });
     await admin.save();
-    co // Generate 6-digit verification code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    admin.verificationCode = code;
-    admin.verificationExpires = Date.now() + 10 * 60 * 1000; // 10 mins
-// Send verification email
-    await transporter.sendMail({
-      from: 'agcteenchurchofficial@gmail.com',
-      to: admin.email,
-      subject: 'Verify Your Admin Account',
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee;">
-          <h2>Welcome to Teens Church Admin</h2>
-          <p>Hi ${name},</p>
-          <p>Your verification code is:</p>
-          <div style="font-size: 24px; font-weight: bold; color: #2c3e50;">${code}</div>
-          <p>This code will expire in 10 minutes.</p>
-          <p>If you did not register, please ignore this email.</p>
-        </div>
-      `
-    });
-     res.status(201).json({
-      message: 'Admin registered. Verification code sent to email.',
-      email: admin.email
-    });
+    console.log('[DEBUG] Admin saved');
 
+    await sendVerificationEmail(email, verificationToken);
+    console.log('[DEBUG] Verification email sent');
+
+    res.status(201).json({ message: 'Registration successful! Check your email.', token: verificationToken });
   } catch (err) {
-    console.error('[REGISTER ERROR]', err);
+    console.error('[ERROR] Registration failed:', err);
     res.status(500).json({ error: 'Registration failed' });
   }
 });
+
+
 
 
 router.post('/verify-code', async (req, res) => {
