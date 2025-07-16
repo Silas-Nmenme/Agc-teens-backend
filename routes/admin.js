@@ -25,23 +25,33 @@ const transporter = nodemailer.createTransport({
 // Admin Registration
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, username, email, phone, password } = req.body;
 
-    if (!name || !email || !password) {
+    // Validate all fields
+    if (!name || !username || !email || !phone || !password) {
       return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    const existing = await Admin.findOne({ email });
-    if (existing) {
+    // Check for existing email or username
+    const existingEmail = await Admin.findOne({ email });
+    if (existingEmail) {
       return res.status(400).json({ error: 'Email already exists.' });
     }
 
-    const admin = await Admin.create({ name, email, password });
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET);
-    res.json({ token });
+    const existingUsername = await Admin.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ error: 'Username already exists.' });
+    }
 
+    // Create admin
+    const admin = await Admin.create({ name, username, email, phone, password });
+
+    // Generate token
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.status(201).json({ token, message: 'Registration successful' });
   } catch (err) {
-    console.error('Registration Error:', err); // Critical for debugging
+    console.error('Registration Error:', err);
     res.status(400).json({ error: err.message || 'Registration failed.' });
   }
 });
