@@ -27,34 +27,63 @@ router.post('/register', async (req, res) => {
   try {
     const { name, username, email, phone, password } = req.body;
 
-    // Validate all fields
-    if (!name || !username || !email || !phone || !password) {
+    if (!name || !email || !password) {
       return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    // Check for existing email or username
-    const existingEmail = await Admin.findOne({ email });
-    if (existingEmail) {
+    const existing = await Admin.findOne({ email });
+    if (existing) {
       return res.status(400).json({ error: 'Email already exists.' });
     }
 
-    const existingUsername = await Admin.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ error: 'Username already exists.' });
-    }
+    // Create verification token
+    const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-    // Create admin
-    const admin = await Admin.create({ name, username, email, phone, password });
+    // Create user
+    const admin = await Admin.create({
+      name,
+      email,
+      password,
+      verificationToken
+    });
 
-    // Generate token
-const token = await jwt.sign({email: email}, process.env.JWT_SECRET, {expiresIn: process.env.JWT_EXPIRATION});
+    // Send email
+    const verifyUrl = `https://agc-teens-backend.onrender.com/api/admin/verify/${verificationToken}`;
+    await sendEmail(email, 'Verify Your Email', `
+      <h2>Welcome, ${name}!</h2>
+      <p>Please verify your email by clicking the link below:</p>
+      <a href="${verifyUrl}">Verify Now</a>
+    `);
 
-    res.status(201).json({ token, message: 'Registration successful' });
+    res.status(201).json({ message: 'Registration successful! Please check your email to verify your account.' });
+
   } catch (err) {
     console.error('Registration Error:', err);
     res.status(400).json({ error: err.message || 'Registration failed.' });
   }
 });
+
+router.get('/verify/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const admin = await Admin.findOne({ email: decoded.email });
+    if (!admin) return res.status(400).send('Invalid token or user not found.');
+    if (admin.isVerified) return res.status(200).send('Email already verified.');
+
+    admin.isVerified = true;
+    admin.verificationToken = null;
+    await admin.save();
+
+    res.send('Email verified successfully! You can now log in.');
+
+  } catch (err) {
+    console.error('Verification Error:', err);
+    res.status(400).send('Invalid or expired token.');
+  }
+});
+
 
 // Admin Login
 router.post('/login', async (req, res) => {
