@@ -74,7 +74,7 @@ router.get('/verify', async (req, res) => {
     res.send(`
       <div style="text-align: center; padding: 50px; font-family: Arial;">
         <h2>🎉 Your account has been verified!</h2>
-        <p>You can now <a href="/public/login.html">log in</a> to the Admin Dashboard.</p>
+        <p>You can now <a href="login.html">log in</a> to the Admin Dashboard.</p>
       </div>
     `);
   } catch (err) {
