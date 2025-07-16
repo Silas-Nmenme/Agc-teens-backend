@@ -1,15 +1,18 @@
+require('dotenv').config();
+console.log("JWT_SECRET value:", process.env.JWT_SECRET);
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const connectDB = require('./config/db');
-const dotenv = require('dotenv');
 const sendEmail = require('./config/emailService');
 const jwt = require('jsonwebtoken');
-const Admin = require('./models/Adminschema.js');
+const Adminschema = require('./models/Adminschema.js');
 const requireAuth = require('./middlewares/auth.js');
 const adminRoutes = require('./routes/admin.js');
 const path = require('path');
 
+const app = express();
+app.use(express.json());
 
 // Import Models
 const RSVP = require('./models/RSVP');
@@ -17,14 +20,11 @@ const Newsletter = require('./models/Newsletter');
 const PrayerRequest = require('./models/PrayerRequest.js');
 const Chat = require('./models/Chats');
 
-require('dotenv').config();
-const app = express();
-const PORT = process.env.PORT || 4500;
 
+const PORT = process.env.PORT || 4500;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
 
 //Uploade
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

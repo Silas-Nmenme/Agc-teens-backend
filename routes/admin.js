@@ -47,7 +47,7 @@ router.post('/register', async (req, res) => {
     const admin = await Admin.create({ name, username, email, phone, password });
 
     // Generate token
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+const token = await jwt.sign({email: email}, process.env.JWT_SECRET, {expiresIn: process.env.JWT_EXPIRATION});
 
     res.status(201).json({ token, message: 'Registration successful' });
   } catch (err) {
