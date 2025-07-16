@@ -89,11 +89,30 @@ router.get('/verify', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const admin = await Admin.findOne({ email });
+
   if (!admin || !(await admin.comparePassword(password))) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
-  const token = jwt.sign({ id: admin._id }, JWT_SECRET);
-  res.json({ token });
+
+  // Update last login time
+  admin.lastLogin = new Date();
+  await admin.save();
+
+  const token = jwt.sign({ id: admin._id }, JWT_SECRET, { expiresIn: '2h' });
+
+  res.json({
+    token,
+    name: admin.name,
+    email: admin.email,
+    lastLogin: admin.lastLogin
+  });
+});
+
+router.get('/me', auth, async (req, res) => {
+  const admin = await Admin.findById(req.user.id).select('-password');
+  if (!admin) return res.status(404).json({ error: 'Admin not found' });
+
+  res.json(admin);
 });
 
 // Admin Logout
