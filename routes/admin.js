@@ -40,17 +40,41 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email already registered' });
     }
 
-    const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    console.log('[DEBUG] Generated verificationToken');
+    // Generate 6-digit code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationExpires = Date.now() + 10 * 60 * 1000; // 10 mins from now
 
-    const admin = new Admin({ name, username, email, phone, password, verificationToken });
+    // Create and save admin
+    const admin = new Admin({
+      name,
+      username,
+      email,
+      phone,
+      password,
+      verificationCode,
+      verificationExpires
+    });
+
     await admin.save();
-    console.log('[DEBUG] Admin saved');
+    console.log('[DEBUG] Admin saved with code:', verificationCode);
 
-    await sendVerificationEmail(email, verificationToken);
-    console.log('[DEBUG] Verification email sent');
+    // Send the verification email
+    await transporter.sendMail({
+      from: 'agcteenchurchofficial@gmail.com',
+      to: email,
+      subject: 'Verify Your Admin Account',
+      html: `
+        <h2>Welcome to Teens Church Admin</h2>
+        <p>Your verification code is:</p>
+        <h1>${verificationCode}</h1>
+        <p>This code expires in 10 minutes. Please do not share it.</p>
+      `
+    });
 
-    res.status(201).json({ message: 'Registration successful! Check your email.', token: verificationToken });
+    res.status(201).json({
+      message: 'Registration successful! Verification code sent to email.'
+    });
+
   } catch (err) {
     console.error('[ERROR] Registration failed:', err);
     res.status(500).json({ error: 'Registration failed' });
@@ -79,7 +103,7 @@ router.post('/verify-code', async (req, res) => {
   admin.verificationExpires = null;
   await admin.save();
 
-  res.json({ message: 'Verification successful' });
+  res.json({ message: 'Email verified successfully!' });
 });
 
 

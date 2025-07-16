@@ -34,9 +34,9 @@ const adminSchema = new mongoose.Schema({
   type: Date,
   default: null,
 },
-  verificationToken: {
-    type: String
-  }
+verificationCode: String,
+verificationExpires: Date,
+isVerified: { type: Boolean, default: false },
 }, { timestamps: true });
 
 // Hash password before saving
