@@ -60,12 +60,12 @@ router.post('/register', async (req, res) => {
 
     // Send the verification email
     await transporter.sendMail({
-      from: 'agcteenchurchofficial@gmail.com',
-      to: email,
-      subject: 'Verify Your Admin Account',
-      html: `
-        <h2>Welcome to Teens Church Admin</h2>
-        <p>Your verification code is:</p>
+  from: '"AGC Teens Admin" <samuelkachi15@gmail.com>', // <-- Display name added
+  to: admin.email,
+  subject: 'Verify Your Admin Account',
+  html: `
+    <h3>Welcome to Teens Church Admin</h3>
+    <p>Your verification code is:</p>
         <h1>${verificationCode}</h1>
         <p>This code expires in 10 minutes. Please do not share it.</p>
       `
@@ -81,7 +81,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-
+//Verify Code
 router.post('/verify-code', async (req, res) => {
   const { email, code } = req.body;
   console.log('[VERIFY CODE] Email:', email, 'Code:', code); 
