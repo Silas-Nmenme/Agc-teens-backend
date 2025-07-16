@@ -139,4 +139,26 @@ router.post('/countdown', auth, async (req, res) => {
   res.json({ message: 'Countdown saved', countdown });
 });
 
+// Update admin profile
+router.put('/profile', auth, async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    const admin = await Admin.findById(req.user.id);
+    if (!admin) return res.status(404).json({ error: 'Admin not found' });
+
+    admin.name = name || admin.name;
+    admin.email = email || admin.email;
+
+    if (password && password.trim()) {
+      admin.password = password; // Will be hashed in pre-save hook
+    }
+
+    await admin.save();
+    res.json({ message: 'Profile updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
