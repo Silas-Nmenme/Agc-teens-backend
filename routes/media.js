@@ -20,17 +20,27 @@ const upload = multer({ storage });
 
 // routes/media.js
 router.post('/', auth, upload.single('file'), async (req, res) => {
-  const { type, description } = req.body;
-  const url = '/uploads/' + req.file.filename;
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
 
-  const media = await Media.create({ 
-    filename: req.file.originalname,
-    type,
-    description,
-    url
-  });
+    const { type, description } = req.body;
+    const url = '/uploads/' + req.file.filename;
 
-  res.json(media);
+    const media = await Media.create({ 
+      filename: req.file.originalname,
+      type,
+      description,
+      url
+    });
+
+    return res.json(media);
+
+  } catch (err) {
+    console.error('Upload error:', err);
+    return res.status(500).json({ error: 'Internal server error' }); // ✅ JSON guaranteed
+  }
 });
 
 
