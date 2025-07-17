@@ -18,26 +18,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// routes/media.js
 router.post('/', auth, upload.single('file'), async (req, res) => {
-  try {
-    const { type, description } = req.body;
-    const originalName = req.file.originalname;
-    const storedName = req.file.filename;
-    const url = '/uploads/' + storedName;
+  const { type, description } = req.body;
+  const url = '/uploads/' + req.file.filename;
 
-    const media = await Media.create({
-      filename: originalName,
-      storedName,
-      type,
-      description,
-      url
-    });
+  const media = await Media.create({ 
+    filename: req.file.originalname,
+    type,
+    description,
+    url
+  });
 
-    res.json(media);
-  } catch (err) {
-    console.error('Media upload failed:', err.message);
-    res.status(500).json({ error: 'Upload failed' });
-  }
+  res.json(media);
 });
 
 

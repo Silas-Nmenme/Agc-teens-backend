@@ -2,10 +2,9 @@ const mongoose = require('mongoose');
 
 const mediaSchema = new mongoose.Schema({
   filename: { type: String, required: true },
-  storedName: { type: String, required: true },
-  type: { type: String, required: true }, // image, video, audio
+  type: { type: String, required: true },
   description: { type: String },
-  url: { type: String, required: true },
+  url: { type: String },
   uploadedAt: { type: Date, default: Date.now }
 });
 
