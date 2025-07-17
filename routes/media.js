@@ -20,7 +20,7 @@ const upload = multer({ storage });
 
 router.post('/', auth, upload.single('file'), async (req, res) => {
   try {
-    const { type } = req.body;
+    const { type, description } = req.body;
     const originalName = req.file.originalname;
     const storedName = req.file.filename;
     const url = '/uploads/' + storedName;
@@ -29,6 +29,7 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
       filename: originalName,
       storedName,
       type,
+      description,
       url
     });
 
@@ -38,6 +39,7 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
     res.status(500).json({ error: 'Upload failed' });
   }
 });
+
 
 router.get('/', auth, async (req, res) => {
   const media = await Media.find().sort({ uploadedAt: -1 });
