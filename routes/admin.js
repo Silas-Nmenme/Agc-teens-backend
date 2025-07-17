@@ -138,8 +138,15 @@ router.get('/me', auth, async (req, res) => {
 
 // Admin Logout
 router.post('/logout', (req, res) => {
-  res.status(200).json({ message: 'Logged out' });
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Logout failed' });
+    }
+    res.clearCookie('connect.sid'); // default cookie name
+    res.status(200).json({ message: 'Logged out successfully' });
+  });
 });
+
 
 // Get RSVPs
 router.get('/rsvp', auth, async (req, res) => {

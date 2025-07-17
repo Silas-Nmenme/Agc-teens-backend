@@ -20,12 +20,12 @@ const PrayerRequest = require('./models/PrayerRequest.js');
 const Chat = require('./models/Chats');
 
 
-const PORT = process.env.PORT || 4500;
+const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(cors());
 
-//Uploade
+//Media upload
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/admin', adminRoutes);

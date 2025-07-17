@@ -33,3 +33,11 @@ module.exports = async (req, res, next) => {
     res.status(401).json({ error: 'Invalid token' });
   }
 };
+module.exports = (req, res, next) => {
+  if (req.session && req.session.adminId) {
+    req.user = { id: req.session.adminId }; // Set user context
+    next();
+  } else {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+};
