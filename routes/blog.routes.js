@@ -11,9 +11,14 @@ router.post('/', auth, async (req, res) => {
   res.json(blog);
 });
 
-router.get('/', auth, async (req, res) => {
-  const blogs = await Blog.find().sort({ createdAt: -1 });
-  res.json(blogs);
+// Blog Count
+router.get('/count', auth, async (req, res) => {
+  try {
+    const count = await Blog.countDocuments();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to count blogs' });
+  }
 });
 
 router.delete('/:id', auth, async (req, res) => {

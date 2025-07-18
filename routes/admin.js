@@ -148,23 +148,36 @@ router.post('/logout', (req, res) => {
 });
 
 
-// Get RSVPs
-router.get('/rsvp', auth, async (req, res) => {
-  const rsvps = await RSVP.find().sort({ createdAt: -1 });
-  res.json(rsvps);
+// RSVP Count
+router.get('/rsvps/count', auth, async (req, res) => {
+  try {
+    const count = await RSVP.countDocuments();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to count RSVPs' });
+  }
 });
 
-// Get Prayer Requests
-router.get('/prayers', auth, async (req, res) => {
-  const prayers = await Prayer.find().sort({ createdAt: -1 });
-  res.json(prayers);
+// Prayer Count
+router.get('/prayers/count', auth, async (req, res) => {
+  try {
+    const count = await Prayer.countDocuments();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to count prayers' });
+  }
 });
 
-// Get Newsletter Subscribers
-router.get('/subscribers', auth, async (req, res) => {
-  const subscribers = await Newsletter.find().sort({ createdAt: -1 });
-  res.json(subscribers);
+// Subscriber Count
+router.get('/subscribers/count', auth, async (req, res) => {
+  try {
+    const count = await Newsletter.countDocuments();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to count subscribers' });
+  }
 });
+
 
 // Get Countdown
 router.get('/countdown', async (req, res) => {
