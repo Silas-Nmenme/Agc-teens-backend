@@ -1,10 +1,26 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const mediaSchema = new mongoose.Schema({
-  filename: String,
-  path: String,
-  type: String,
-  createdAt: { type: Date, default: Date.now }
+  filename: {
+    type: String,
+    required: true,
+  },
+  path: {
+    type: String,
+    required: true,
+  },
+  size: {
+    type: Number,
+    required: true,
+  },
+  mimetype: {
+    type: String,
+    required: true,
+  },
+  uploadedAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('Media', mediaSchema);
+module.exports = mongoose.model("Media", mediaSchema);
