@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 const Adminschema = require('./models/Adminschema.js');
 const requireAuth = require('./middlewares/auth.js');
 const adminRoutes = require('./routes/admin.js');
-const path = require('path');
+const path = require("path");
 
 const app = express();
 app.use(express.json());
@@ -26,8 +26,9 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 
 //Media upload
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+//API Routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/media', require('./routes/media'));
 app.use('/api/rsvp', require('./routes/rsvp'));
