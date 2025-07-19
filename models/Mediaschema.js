@@ -5,6 +5,10 @@ const mediaSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  originalname: {
+    type: String,
+    required: true,
+  },
   path: {
     type: String,
     required: true,
@@ -16,6 +20,11 @@ const mediaSchema = new mongoose.Schema({
   mimetype: {
     type: String,
     required: true,
+  },
+  uploadedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
+    required: false,
   },
   uploadedAt: {
     type: Date,
