@@ -8,43 +8,59 @@ const Media = require('../models/Mediaschema.js');
 const auth = require('../middlewares/auth');
 
 
-// Setup storage engine
+// === Storage Setup ===
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, "uploads/"); // Ensure this folder exists
   },
   filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
+    const ext = path.extname(file.originalname);
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
     cb(null, uniqueName);
   },
 });
 
-const upload = multer({ storage });
+// === File Filter (Optional) ===
+const fileFilter = (req, file, cb) => {
+  const allowed = /jpeg|jpg|png|gif|mp4|mov|mp3|wav/;
+  const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+  const mime = allowed.test(file.mimetype);
+  if (ext && mime) return cb(null, true);
+  cb(new Error("Unsupported file type"), false);
+};
 
-// Upload Media
-router.post('/upload', auth, upload.single('file'), async (req, res) => {
-  try {
-    const media = new Media({
-      filename: req.file.filename,
-      path: req.file.path,
-      type: req.file.mimetype,
-    });
-    await media.save();
-    res.status(201).json({ message: 'Media uploaded successfully', media });
-  } catch (err) {
-    console.error('Media upload error:', err);
-    res.status(500).json({ error: 'Media upload failed' });
-  }
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB max
 });
 
-// Get All Media
-router.get('/', auth, async (req, res) => {
-  try {
-    const mediaFiles = await Media.find().sort({ createdAt: -1 });
-    res.json(mediaFiles);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch media' });
+// === Upload Route ===
+router.post("/upload", upload.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
   }
+
+  res.status(201).json({
+    message: "File uploaded successfully",
+    filename: req.file.filename,
+    path: `uploads/${req.file.filename}`,
+  });
+});
+
+// === GET all uploaded files ===
+
+router.get("/", (req, res) => {
+  fs.readdir("uploads/", (err, files) => {
+    if (err) return res.status(500).json({ error: "Failed to list media" });
+
+    const media = files.map((filename) => ({
+      filename,
+      path: `uploads/${filename}`,
+    }));
+
+    res.json(media);
+  });
 });
 
 module.exports = router;
