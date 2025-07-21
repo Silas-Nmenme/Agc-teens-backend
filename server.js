@@ -30,8 +30,12 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 //API Routes
 app.use('/api/admin', adminRoutes);
-app.use('/api/media', require('./routes/media'));
 app.use('/api/rsvp', require('./routes/rsvp'));
+
+// Media Routes
+const mediaRoutes = require('./routes/media');
+app.use('/api/media', mediaRoutes);
+
 
 
 // RSVP Endpoint
