@@ -24,12 +24,12 @@ const RSVP = require('./models/RSVP');
 const Newsletter = require('./models/Newsletter');
 const PrayerRequest = require('./models/PrayerRequest');
 const Chat = require('./models/Chats');
+const subscriberRoutes = require('./routes/subscribers');
 
 // ===================
 // Route Imports
 // ===================
 const adminRoutes = require('./routes/admin');
-const rsvpRoutes = require('./routes/rsvp');
 const prayerRoutes = require('./routes/prayer');     
 const blogRoutes = require('./routes/blog.routes');          
 const subscriberRoutes = require('./routes/subscribers'); 
@@ -39,7 +39,7 @@ const mediaRoutes = require('./routes/media');
 // Register Routes
 // ===================
 app.use('/api/admin', adminRoutes);
-app.use('/api/rsvp', rsvpRoutes);
+app.use('/api/rsvps', require('./routes/rsvp'));
 app.use('/api/prayer', prayerRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/subscriber', subscriberRoutes);
