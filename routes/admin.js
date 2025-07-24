@@ -100,7 +100,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Get current admin profile (for dashboard)
-router.get('/me', auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const admin = await Admin.findById(req.user.id).select('-password');
     if (!admin) return res.status(404).json({ error: 'Admin not found' });
