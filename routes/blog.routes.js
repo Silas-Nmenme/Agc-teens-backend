@@ -6,12 +6,12 @@ const router = express.Router();
 
 
 // Count blogs
-router.get("/count", auth, async (req, res) => {
+router.get('/count', auth, async (req, res) => {
   try {
     const count = await Blog.countDocuments();
     res.json({ count });
   } catch (err) {
-    res.status(500).json({ error: "Failed to count blogs" });
+    res.status(500).json({ error: 'Failed to count blogs' });
   }
 });
 
