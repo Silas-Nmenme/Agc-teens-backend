@@ -37,7 +37,7 @@ const mediaRoutes = require('./routes/media');
 // ===================
 // Register Routes
 // ===================
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', require('./routes/admin'));
 app.use('/api/rsvps', require('./routes/rsvp'));
 app.use('/api/prayers', require('./routes/prayer'));
 app.use('/api/blogs', require('./routes/blog.routes'));
