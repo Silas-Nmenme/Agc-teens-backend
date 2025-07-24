@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 const sendEmail = require('./config/emailService');
 const path = require("path");
 const app = express();
+const router = express.Router();
 
 const PORT = process.env.PORT || 4500;
 
@@ -17,7 +18,7 @@ app.use(express.json()); // very important for POST/PUT
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ===================
-// Models (used only if needed directly here)
+// Models
 // ===================
 const RSVP = require('./models/RSVP');
 const Newsletter = require('./models/Newsletter');
@@ -117,6 +118,7 @@ app.post('/api/chat', async (req, res) => {
     res.status(500).json({ message: 'Chat error' });
   }
 });
+
 
 // Root
 app.get('/', (req, res) => {
