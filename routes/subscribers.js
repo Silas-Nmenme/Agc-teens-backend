@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const Subscriber = require("../models/subscribers");
 const auth = require("../middlewares/auth");
 // Count Subscribers
 router.get("/count", auth, async (req, res) => {

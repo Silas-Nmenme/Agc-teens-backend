@@ -18,9 +18,11 @@ const RSVP = require('./models/RSVP');
 const Newsletter = require('./models/Newsletter');
 const PrayerRequest = require('./models/PrayerRequest.js');
 const Chat = require('./models/Chats');
+const Blog = require('./models/Blog.js');
+const Subscribers = require('./models/subscribers.js');
 
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4500;
 
 // Middleware
 app.use(cors());
