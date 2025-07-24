@@ -24,7 +24,6 @@ const RSVP = require('./models/RSVP');
 const Newsletter = require('./models/Newsletter');
 const PrayerRequest = require('./models/PrayerRequest');
 const Chat = require('./models/Chats');
-const subscriberRoutes = require('./routes/subscribers');
 
 // ===================
 // Route Imports
@@ -40,10 +39,10 @@ const mediaRoutes = require('./routes/media');
 // ===================
 app.use('/api/admin', adminRoutes);
 app.use('/api/rsvps', require('./routes/rsvp'));
-app.use('/api/prayer', prayerRoutes);
-app.use('/api/blog', blogRoutes);
-app.use('/api/subscriber', subscriberRoutes);
-app.use('/api/media', mediaRoutes);
+app.use('/api/prayers', require('./routes/prayer'));
+app.use('/api/blogs', require('./routes/blog.routes'));
+app.use('/api/subscribers', require('./routes/subscribers'));
+app.use('/api/media', require('./routes/media'));
 
 // ===================
 // Public API Endpoints
