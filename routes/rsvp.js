@@ -12,6 +12,6 @@ router.get("/count", auth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Failed to count RSVPs" });
   }
-});
+})
 
 module.exports = router;

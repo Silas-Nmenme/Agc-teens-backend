@@ -4,14 +4,14 @@ const Subscriber = require("../models/subscribers");
 const auth = require("../middlewares/auth");
 
 // Get all subscribers
-router.get("/", async (req, res) => {
+router.get("/count", auth, async (req, res) => {
   try {
-    const subscribers = await Subscriber.find().sort({ createdAt: -1 });
-    res.json({ subscribers });
+    const count = await Subscriber.countDocuments();
+    res.json({ count });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch subscribers" });
+    res.status(500).json({ error: "Failed to count subscribers" });
   }
-});
+})
 
 
 module.exports = router;
