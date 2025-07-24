@@ -129,11 +129,15 @@ router.post('/login', async (req, res) => {
   });
 });
 
-router.get('/me', auth, async (req, res) => {
-  const admin = await Admin.findById(req.user.id).select('-password');
-  if (!admin) return res.status(404).json({ error: 'Admin not found' });
-
-  res.json(admin);
+// Get current admin info
+router.get("/me", auth, async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.user.id).select("-password");
+    if (!admin) return res.status(404).json({ error: "Admin not found" });
+    res.json({ admin });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch admin info" });
+  }
 });
 
 // Admin Logout
