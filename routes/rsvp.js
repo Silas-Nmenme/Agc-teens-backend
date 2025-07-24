@@ -1,13 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const RSVP = require('../models/RSVP');
+const auth = require('../middlewares/auth');
 
-router.get('/', async (req, res) => {
+
+// Count RSVPs
+router.get("/count", auth, async (req, res) => {
   try {
-    const rsvps = await RSVP.find();
-    res.json(rsvps);
+    const count = await RSVP.countDocuments();
+    res.json({ count });
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Failed to count RSVPs" });
   }
 });
 
