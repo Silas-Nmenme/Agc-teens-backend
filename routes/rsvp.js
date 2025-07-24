@@ -4,6 +4,16 @@ const RSVP = require('../models/RSVP');
 const auth = require('../middlewares/auth');
 
 
+// Get all RSVPs
+router.get("/", auth, async (req, res) => {
+  try {
+    const rsvps = await RSVP.find().sort({ createdAt: -1 });
+    res.json({ rsvps });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch RSVPs" });
+  }
+});
+
 // Count RSVPs
 router.get("/count", auth, async (req, res) => {
   try {
@@ -11,6 +21,26 @@ router.get("/count", auth, async (req, res) => {
     res.json({ count });
   } catch (err) {
     res.status(500).json({ error: "Failed to count RSVPs" });
+  }
+});
+
+// Update RSVP
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const updated = await RSVP.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json({ message: "RSVP updated", updated });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update RSVP" });
+  }
+});
+
+// Delete RSVP
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    await RSVP.findByIdAndDelete(req.params.id);
+    res.json({ message: "RSVP deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete RSVP" });
   }
 });
 
