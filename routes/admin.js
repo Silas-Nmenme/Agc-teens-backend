@@ -1,4 +1,3 @@
-// routes/admin.js
 const express = require('express');
 const router = express.Router();
 const Admin = require('../models/Adminschema');
@@ -13,8 +12,8 @@ const Prayer = require('../models/PrayerRequest');
 const sendVerificationEmail = require('../templates/templates.admin');
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const BASE_URL = process.env.BASE_URL;
 
+// Email transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -26,25 +25,17 @@ const transporter = nodemailer.createTransport({
 // Admin Registration
 router.post('/register', async (req, res) => {
   try {
-    console.log('[DEBUG] Request body:', req.body);
-
     const { name, username, email, phone, password } = req.body;
     if (!name || !email || !password) {
-      console.error('[DEBUG] Validation failed:', { name, email, password });
       return res.status(400).json({ error: 'Name, email, and password are required.' });
     }
-
     const existing = await Admin.findOne({ email });
-    console.log('[DEBUG] existing user:', existing);
     if (existing) {
       return res.status(400).json({ error: 'Email already registered' });
     }
-
-    // Generate 6-digit code
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const verificationExpires = Date.now() + 10 * 60 * 1000; // 10 mins from now
+    const verificationExpires = Date.now() + 10 * 60 * 1000; // 10 mins
 
-    // Create and save admin
     const admin = new Admin({
       name,
       username,
@@ -54,73 +45,52 @@ router.post('/register', async (req, res) => {
       verificationCode,
       verificationExpires
     });
-
     await admin.save();
-    console.log('[DEBUG] Admin saved with code:', verificationCode);
 
-    // Send the verification email
+    // Send verification email
     await transporter.sendMail({
-  from: '"AGC Teens Admin" <samuelkachi15@gmail.com>', // <-- Display name added
-  to: admin.email,
-  subject: 'Verify Your Admin Account',
-  html: `
-    <h3>Welcome to Teens Church Admin</h3>
-    <p>Your verification code is:</p>
+      from: `"AGC Teens Admin" <${process.env.EMAIL_USER}>`,
+      to: admin.email,
+      subject: 'Verify Your Admin Account',
+      html: `
+        <h3>Welcome to Teens Church Admin</h3>
+        <p>Your verification code is:</p>
         <h1>${verificationCode}</h1>
         <p>This code expires in 10 minutes. Please do not share it.</p>
       `
     });
 
-    res.status(201).json({
-      message: 'Registration successful! Verification code sent to email.'
-    });
-
+    res.status(201).json({ message: 'Registration successful! Verification code sent to email.' });
   } catch (err) {
-    console.error('[ERROR] Registration failed:', err);
     res.status(500).json({ error: 'Registration failed' });
   }
 });
 
-//Verify Code
+// Verify Code
 router.post('/verify-code', async (req, res) => {
   const { email, code } = req.body;
-  console.log('[VERIFY CODE] Email:', email, 'Code:', code); 
-
   const admin = await Admin.findOne({ email });
-
   if (!admin) return res.status(404).json({ error: 'Admin not found' });
-
-  if (
-    admin.verificationCode !== code ||
-    admin.verificationExpires < Date.now()
-  ) {
+  if (admin.verificationCode !== code || admin.verificationExpires < Date.now()) {
     return res.status(400).json({ error: 'Invalid or expired code' });
   }
-
   admin.isVerified = true;
   admin.verificationCode = null;
   admin.verificationExpires = null;
   await admin.save();
-
   res.json({ message: 'Email verified successfully!' });
 });
-
 
 // Admin Login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const admin = await Admin.findOne({ email });
-
   if (!admin || !(await admin.comparePassword(password))) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
-
-  // Update last login time
   admin.lastLogin = new Date();
   await admin.save();
-
   const token = jwt.sign({ id: admin._id }, JWT_SECRET, { expiresIn: '2h' });
-
   res.json({
     token,
     name: admin.name,
@@ -142,15 +112,16 @@ router.get("/me", auth, async (req, res) => {
 
 // Admin Logout
 router.post('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Logout failed' });
-    }
-    res.clearCookie('connect.sid'); // default cookie name
+  if (req.session) {
+    req.session.destroy((err) => {
+      if (err) return res.status(500).json({ error: 'Logout failed' });
+      res.clearCookie('connect.sid');
+      res.status(200).json({ message: 'Logged out successfully' });
+    });
+  } else {
     res.status(200).json({ message: 'Logged out successfully' });
-  });
+  }
 });
-
 
 // RSVP Count
 router.get('/rsvps/count', auth, async (req, res) => {
@@ -182,49 +153,50 @@ router.get('/subscribers/count', auth, async (req, res) => {
   }
 });
 
-
 // Get Countdown
 router.get('/countdown', async (req, res) => {
-  const data = await Countdown.findOne();
-  res.json(data);
+  try {
+    const data = await Countdown.findOne();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch countdown' });
+  }
 });
 
 // Set Countdown
 router.post('/countdown', auth, async (req, res) => {
   const { event, date } = req.body;
-  let countdown = await Countdown.findOne();
-  if (countdown) {
-    countdown.event = event;
-    countdown.date = date;
-  } else {
-    countdown = new Countdown({ event, date });
+  try {
+    let countdown = await Countdown.findOne();
+    if (countdown) {
+      countdown.event = event;
+      countdown.date = date;
+    } else {
+      countdown = new Countdown({ event, date });
+    }
+    await countdown.save();
+    res.json({ message: 'Countdown saved', countdown });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save countdown' });
   }
-  await countdown.save();
-  res.json({ message: 'Countdown saved', countdown });
 });
 
 // Update admin profile
 router.put('/profile', auth, async (req, res) => {
   const { name, email, password } = req.body;
-
   try {
     const admin = await Admin.findById(req.user.id);
     if (!admin) return res.status(404).json({ error: 'Admin not found' });
-
     admin.name = name || admin.name;
     admin.email = email || admin.email;
-
     if (password && password.trim()) {
       admin.password = password; // Will be hashed in pre-save hook
     }
-
     await admin.save();
     res.json({ message: 'Profile updated successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
-
 
 module.exports = router;
