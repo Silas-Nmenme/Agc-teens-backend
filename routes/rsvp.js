@@ -5,13 +5,13 @@ const auth = require('../middlewares/auth');
 
 
 // Count RSVPs
-router.get("/count", auth, async (req, res) => {
+router.get('/count', auth, async (req, res) => {
   try {
     const count = await RSVP.countDocuments();
     res.json({ count });
   } catch (err) {
-    res.status(500).json({ error: "Failed to count RSVPs" });
+    res.status(500).json({ error: 'Failed to count RSVPs' });
   }
-})
+});
 
 module.exports = router;
