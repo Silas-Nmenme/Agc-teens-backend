@@ -33,6 +33,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 //API Routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/rsvp', require('./routes/rsvp'));
+app.use("/api/prayers", require("./routes/prayer.js"));
+app.use("/api/blogs", require("./routes/blog.routes.js"));
+app.use("/api/subscribers", require("./routes/subscribers.js"));
 
 // Media Routes
 const mediaRoutes = require('./routes/media');

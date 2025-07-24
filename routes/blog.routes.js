@@ -2,6 +2,7 @@
 const express = require('express');
 const Blog = require('../models/Blog');
 const auth = require('../middlewares/auth');
+const router = express.Router();
 
 
 // Count Blog Posts
