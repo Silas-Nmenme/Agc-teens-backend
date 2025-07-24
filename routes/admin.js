@@ -100,14 +100,21 @@ router.post('/login', async (req, res) => {
 });
 
 // Get current admin profile (for dashboard)
-router.get("/me", auth, async (req, res) => {
+router.get('/me', auth, async (req, res) => {
   try {
-    const admin = await Admin.findById(req.user.id).select("-password"); // exclude password
-    if (!admin) return res.status(404).json({ error: "Admin not found" });
-    res.json(admin);
+    const admin = await Admin.findById(req.user.id).select('-password');
+    if (!admin) return res.status(404).json({ error: 'Admin not found' });
+
+    res.json({
+      id: admin._id,
+      name: admin.name,
+      email: admin.email,
+      role: admin.role || 'admin',
+      lastLogin: admin.lastLogin || null
+    });
   } catch (err) {
-    console.error("Admin /me error:", err);
-    res.status(500).json({ error: "Failed to fetch admin profile" });
+    console.error('Admin /me route error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch admin info' });
   }
 });
 
