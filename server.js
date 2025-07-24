@@ -38,10 +38,10 @@ const mediaRoutes = require('./routes/media');
 // Register Routes
 // ===================
 app.use('/api/admin', adminRoutes);
-app.use('/api/rsvps', rsvpRoutes);
-app.use('/api/prayers', prayerRoutes);
-app.use('/api/blogs', blogRoutes);
-app.use('/api/subscribers', subscriberRoutes);
+app.use('/api/rsvp', rsvpRoutes);
+app.use('/api/prayer', prayerRoutes);
+app.use('/api/blog', blogRoutes);
+app.use('/api/subscriber', subscriberRoutes);
 app.use('/api/media', mediaRoutes);
 
 // ===================
