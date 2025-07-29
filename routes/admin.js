@@ -259,5 +259,18 @@ router.get("/rsvps", auth, async (req, res) => {
   }
 });
 
+//Blog
+router.post("/blogs", auth, async (req, res) => {
+  try {
+    const { title, content, author } = req.body;
+    const Blog = require("../models/Blog");
+    const newBlog = new Blog({ title, content, author });
+    await newBlog.save();
+    res.status(201).json({ message: "Blog created successfully", blog: newBlog });
+  } catch (err) {
+    console.error("Failed to create blog:", err);
+    res.status(500).json({ error: "Failed to create blog" });
+  }
+});
 
 module.exports = router
