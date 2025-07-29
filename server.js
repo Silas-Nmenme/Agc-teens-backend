@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 4500
 // Middleware
 // ===================
 app.use(cors())
-app.use(express.json()) 
+app.use(express.json()) // very important for POST/PUT
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 // Models

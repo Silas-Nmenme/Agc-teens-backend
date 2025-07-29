@@ -99,7 +99,7 @@ router.post("/login", async (req, res) => {
   })
 })
 
-// Get current admin profile (for dashboard) - FIXED ENDPOINT
+// Get current admin profile (for dashboard)
 router.get("/me", auth, async (req, res) => {
   try {
     const admin = await Admin.findById(req.user.id).select("-password")
@@ -131,7 +131,7 @@ router.post("/logout", (req, res) => {
   }
 })
 
-// RSVP Count - FIXED PATH
+// RSVP Count 
 router.get("/rsvps/count", auth, async (req, res) => {
   try {
     const count = await RSVP.countDocuments()
@@ -142,7 +142,7 @@ router.get("/rsvps/count", auth, async (req, res) => {
   }
 })
 
-// Prayer Count - FIXED PATH
+// Prayer Count
 router.get("/prayers/count", auth, async (req, res) => {
   try {
     const count = await Prayer.countDocuments()
@@ -153,7 +153,7 @@ router.get("/prayers/count", auth, async (req, res) => {
   }
 })
 
-// Subscriber Count - FIXED PATH
+// Subscriber Count 
 router.get("/subscribers/count", auth, async (req, res) => {
   try {
     const count = await Newsletter.countDocuments()
@@ -164,7 +164,7 @@ router.get("/subscribers/count", auth, async (req, res) => {
   }
 })
 
-// Blog Count - NEW ENDPOINT
+// Blog Count 
 router.get("/blogs/count", auth, async (req, res) => {
   try {
     // If you have a Blog model, use it. Otherwise return 0
@@ -227,5 +227,37 @@ router.put("/profile", auth, async (req, res) => {
     res.status(500).json({ error: "Server error" })
   }
 })
+
+// Get all prayer requests
+router.get("/prayers", auth, async (req, res) => {
+  try {
+    const prayers = await Prayer.find().sort({ createdAt: -1 });
+    res.json(prayers);
+  } catch (err) {
+    console.error("Failed to fetch prayers:", err);
+    res.status(500).json({ error: "Failed to fetch prayers" });
+  }
+});
+
+// Get all subscribers
+router.get("/subscribers", auth, async (req, res) => {
+  try {
+    const subscribers = await Newsletter.find().sort({ createdAt: -1 });
+    res.json(subscribers);
+  } catch (err) {
+    console.error("Failed to fetch subscribers:", err);
+    res.status(500).json({ error: "Failed to fetch subscribers" });
+  }
+});
+router.get("/rsvps", auth, async (req, res) => {
+  try {
+    const rsvps = await RSVP.find().sort({ createdAt: -1 });
+    res.json(rsvps);
+  } catch (err) {
+    console.error("Failed to fetch RSVPs:", err);
+    res.status(500).json({ error: "Failed to fetch RSVPs" });
+  }
+});
+
 
 module.exports = router
