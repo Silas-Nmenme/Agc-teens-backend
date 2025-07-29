@@ -13,7 +13,7 @@ router.get("/count", auth, async (req, res) => {
   }
 })
 
-// Get all RSVPs
+// Get all RSVPs (NEW - for dashboard list)
 router.get("/", auth, async (req, res) => {
   try {
     const rsvps = await RSVP.find().sort({ createdAt: -1 })

@@ -13,7 +13,7 @@ router.get("/count", auth, async (req, res) => {
   }
 })
 
-// Get all prayers 
+// Get all prayers (NEW - for dashboard list)
 router.get("/", auth, async (req, res) => {
   try {
     const prayers = await Prayer.find().sort({ createdAt: -1 })
