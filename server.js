@@ -11,20 +11,17 @@ const router = express.Router()
 const PORT = process.env.PORT || 4500
 
 // Middleware
-// ===================
 app.use(cors())
 app.use(express.json()) // very important for POST/PUT
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 // Models
-// ===================
 const RSVP = require("./models/RSVP")
 const Newsletter = require("./models/Newsletter")
 const PrayerRequest = require("./models/PrayerRequest")
 const Chat = require("./models/Chats")
 
 // Register Routes 
-// ===================
 app.use("/api/admin", require("./routes/admin"))
 app.use("/api/rsvps", require("./routes/rsvp"))
 app.use("/api/prayers", require("./routes/prayer"))
@@ -33,7 +30,6 @@ app.use("/api/subscribers", require("./routes/subscribers"))
 app.use("/api/media", require("./routes/media"))
 
 // Public API Endpoints
-// ===================
 
 // RSVP Form Submission
 app.post("/api/rsvp", async (req, res) => {
@@ -110,7 +106,6 @@ app.get("/", (req, res) => {
 })
 
 // Start Server
-// ===================
 app.listen(PORT, () => {
   connectDB()
   console.log(`Server is running at http://localhost:${PORT}`)
