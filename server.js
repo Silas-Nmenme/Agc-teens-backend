@@ -1,6 +1,7 @@
 require("dotenv").config()
 const express = require("express")
 const mongoose = require("mongoose")
+const morgan = require("morgan")
 const cors = require("cors")
 const connectDB = require("./config/db")
 const sendEmail = require("./config/emailService")
@@ -14,6 +15,23 @@ const PORT = process.env.PORT || 4500
 app.use(cors())
 app.use(express.json()) // very important for POST/PUT
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
+
+// Middleware
+app.use(express.json());
+app.use(morgan("dev")); 
+
+app.use(express.urlencoded({ extended: true }));
+
+
+// ===== CORS Setup =====
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://agdominioncity.netlify.app";
+app.use(cors({
+  origin: FRONTEND_URL,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
 
 // Models
 const RSVP = require("./models/RSVP")
@@ -105,8 +123,13 @@ app.get("/", (req, res) => {
   res.send("AGC Teens Backend is Running")
 })
 
-// Start Server
-app.listen(PORT, () => {
-  connectDB()
-  console.log(`Server is running at http://localhost:${PORT}`)
-})
+// Start server
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Allowed frontend origin: ${FRONTEND_URL}`);
+  });
+}).catch((error) => {
+  console.error("MongoDB Connection Failed:", error.message);
+  process.exit(1);
+});
